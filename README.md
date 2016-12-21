@@ -1,2 +1,2 @@
 # neural_network
-神经网络
+ANN 神经网络
