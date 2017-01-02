@@ -36,9 +36,8 @@ if __name__ == '__main__':
   #参数
   params = {}
   params['layers'] = 3
-  #第2层的单元个数为25个,是隐藏层
-  params['layers_info'] = {1:400,2:25,3:10}
-  params['iters'] = 1000
+  params['layers_info'] = {1:400,2:300,3:10}
+  params['iters'] = 500
   params['lambda'] = 3
   params['learning_rate'] = 6
   params['class_num'] = 10
