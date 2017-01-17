@@ -18,28 +18,37 @@ if __name__ == '__main__':
   logger.debug('start...')
 
   #
-  trainfile,labelfile = sys.argv[1:3]
-
+  trainfile = sys.argv[1]
+  logger.debug('file:%s', trainfile)
   train_data = np.loadtxt(trainfile, delimiter = ',', dtype = np.float)
-  label_data = np.loadtxt(labelfile, delimiter = ',', dtype = np.float)
-  train_data = np.column_stack((train_data, label_data))
+#  label_data = np.loadtxt(labelfile, delimiter = ',', dtype = np.float)
+#  train_data = np.column_stack((train_data, label_data))
   np.random.shuffle(train_data)
+  logger.debug('file:%s', trainfile)
 
-  train_x = train_data[0:4000,0:-1]
-  train_y = train_data[0:4000, -1]
-  test_x = train_data[4000:,0:-1]
-  test_y = train_data[4000:,-1]
+  train_x = train_data[0:1200,0:-10]
+  train_data_y = train_data[0:1200, -10:]
+  train_y = myfunction.HArgmax(train_data_y, len(train_data_y))
+  
+  test_x = train_data[1200:,0:-10]
+  test_data_y = train_data[1200:,-10:]
+  test_y = myfunction.HArgmax(test_data_y, len(test_data_y))
+
+  logger.debug('test_y:%s', test_y)
+  logger.debug('train_y:%s', train_y)
+  logger.debug('train_x:%s', train_x.shape)
+  logger.debug('test_x :%s', test_x.shape)
 
   #显示图片随机抽取100张
-  myplot.ShowSomePictures(train_x, 100, 20, 20)
+ # myplot.ShowSomePictures(train_x, 100, 16, 16)
 
   #参数
   params = {}
   params['layers'] = 3
-  params['layers_info'] = {1:400,2:40,3:10}
-  params['iters'] = 100
-  params['lambda'] = 3
-  params['learning_rate'] = 6
+  params['layers_info'] = {1:256,2:8,3:10}
+  params['iters'] = 900
+  params['lambda'] = 2
+  params['learning_rate'] = 5
   params['class_num'] = 10
   #模型
   model = mymodel.MyNNModel(params)
@@ -61,5 +70,5 @@ if __name__ == '__main__':
     j = np.random.permutation(len(train_x))[0]
     pred = model.Predict(train_x[j,:].reshape(1,train_x.shape[1]))
     print '该图像算法预测的数字是:', pred
-    myplot.ShowPicture(train_x, j, 20, 20)
+    myplot.ShowPicture(train_x, j, 16, 16)
 
