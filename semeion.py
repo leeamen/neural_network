@@ -14,6 +14,12 @@ import numpy as np
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+#adaboost使用的callback方法
+def train_and_return_model_callback(x, y, params):
+  model = mymodel.MyNNModel(params)
+  model.Train(x, y)
+  return model
+
 if __name__ == '__main__':
   logger.debug('start...')
 
@@ -28,11 +34,11 @@ if __name__ == '__main__':
 
   train_x = train_data[0:1200,0:-10]
   train_data_y = train_data[0:1200, -10:]
-  train_y = myfunction.HArgmax(train_data_y, len(train_data_y))
+  train_y = myfunc.HArgmax(train_data_y, len(train_data_y))
   
   test_x = train_data[1200:,0:-10]
   test_data_y = train_data[1200:,-10:]
-  test_y = myfunction.HArgmax(test_data_y, len(test_data_y))
+  test_y = myfunc.HArgmax(test_data_y, len(test_data_y))
 
   logger.debug('test_y:%s', test_y)
   logger.debug('train_y:%s', train_y)
@@ -45,8 +51,8 @@ if __name__ == '__main__':
   #参数
   params = {}
   params['layers'] = 3
-  params['layers_info'] = {1:256,2:8,3:10}
-  params['iters'] = 900
+  params['layers_info'] = {1:256,2:18,3:10}
+  params['iters'] = 200
   params['lambda'] = 2
   params['learning_rate'] = 5
   params['class_num'] = 10
@@ -65,6 +71,28 @@ if __name__ == '__main__':
 #  print test_y
 #  print pred_testy
   print '测试集准确率为:%f' %(float(np.sum(test_y == pred_testy))/len(test_y))
+  import time
+  time.sleep(3)
+
+  '''
+    adaboost
+  '''
+  num_classifier = 5
+  acc = myada.Adaboost(train_x, train_y, test_x, test_y, num_classifier, train_and_return_model_callback, params)
+  logger.info('%d个分类器的adaboost验证集准确率:%f', num_classifier, acc)
+  time.sleep(3)
+
+  '''
+    交叉验证
+  '''
+  train_x = train_data[:,0:-10]
+  train_data_y = train_data[:, -10:]
+  train_y = myfunc.HArgmax(train_data_y, len(train_data_y))
+  fold = 10
+  cv_accuracy = mycv.CrossValidation(model.Train, model.Predict, train_x, train_y, fold)
+  logger.info('%d折交叉验证准确率:%f', fold, cv_accuracy)
+
+  sys.exit(0)
 
   for i in range(0, len(train_x)):
     j = np.random.permutation(len(train_x))[0]

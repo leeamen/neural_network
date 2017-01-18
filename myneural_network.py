@@ -22,7 +22,13 @@ class MyNNModel(object):
     self.lamda = 1.0*params['lambda']
     self.learning_rate = params['learning_rate']
     logger.debug('神经网络有%d层', self.layers)
+    
+    '''
+      初始化权值
+    '''
+    self.__init_weight()
 
+  def __init_weight(self):
     #初始化权值
     for layer in range(1, self.layers):
       #例如401*25
@@ -30,8 +36,11 @@ class MyNNModel(object):
       weights = myequation.RandomSample((self.layers_info[layer] + 1, self.layers_info[layer+1]), 0, 1)
       self.all_weights[layer] = weights
       logger.debug('初始化第%d层权值:%s', layer, weights)
-
     self.train_finish = False
+
+  def __clear_and_init_weight(self):
+    self.all_weights.clear()
+    self.__init_weight()
 
   #all_weights类型:{}
   def LoadWeights(self, all_weights):
@@ -112,6 +121,7 @@ class MyNNModel(object):
       #1/m 并且加上正则项
       weight_grad = 1.0/m * weight_grad
       y_size = self.all_weights[layer].shape[1]
+      #不惩罚偏置单元的权值
       weight_grad += self.lamda/m * np.vstack((np.zeros((1,y_size)), self.all_weights[layer][1:,:]))
       weights_grad[layer] = weight_grad
     return errors, weights_grad
@@ -127,6 +137,17 @@ class MyNNModel(object):
     return np.column_stack((np.ones(len(output)), output))
 
   def Train(self, x, y):
+    '''
+      训练之前重新初始化权值
+    '''
+    if self.train_finish is True:
+#      logger.info('Train again!')
+#      import time
+#      time.sleep(2)
+      self.__clear_and_init_weight()
+    '''
+      开始训练
+    '''
     train_x = x
     train_y = np.empty((len(y), 0))
     class_num = self.class_num
@@ -134,6 +155,7 @@ class MyNNModel(object):
       label_y = np.array(y == label, dtype = float)
       train_y = np.column_stack((train_y, label_y))
     self.__gradient_descent(train_x, train_y)
+    self.train_finish = True
   def Predict(self, x):
     layers = self.layers
     output_last = np.column_stack((np.ones(len(x)), x))
@@ -144,7 +166,7 @@ class MyNNModel(object):
     #输出层
     net = self.__net(output_last, layers)
     output = self.__sigmoid(net)
-    pred_y = myfunction.HArgmax(output, len(output))
+    pred_y = myfunc.HArgmax(output, len(output))
     return pred_y
 
   #对net求导:o(1-o)
