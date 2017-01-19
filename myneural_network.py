@@ -10,7 +10,7 @@ import logging
 import numpy as np
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.WARN)
 
 class MyNNModel(object):
   def __init__(self, params = {}):
